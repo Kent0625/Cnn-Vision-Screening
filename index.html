@@ -3,22 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Refractive Error CNN Visualization</title>
+    <title>Demystifying CNNs for Vision Screening</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .node {
             transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .node:hover {
+            transform: translateX(5px);
         }
         .active-node {
-            transform: scale(1.05);
+            transform: scale(1.05) translateX(5px);
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-            border-color: #3b82f6;
+            border-color: #3b82f6 !important;
+            z-index: 10;
         }
         .flow-line {
             width: 2px;
-            height: 20px;
+            height: 24px;
             background-color: #d1d5db;
-            margin: 0 auto;
+            margin-left: 50%;
             transition: background-color 0.3s ease;
         }
         .active-line {
@@ -30,72 +35,79 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
-    <div class="max-w-4xl mx-auto py-10 px-4">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Automated Ophthalmic Vision Screening</h1>
-            <p class="text-gray-600">Visualization of CNN Architecture for Refractive Error Classification</p>
+    <div class="max-w-6xl mx-auto py-8 px-4">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-3">Inside the "Black Box": CNNs for Vision Screening</h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                How does a Convolutional Neural Network (CNN) process an eye image to detect refractive errors? 
+                Select an input image and click on any layer to understand exactly how the math translates into clinical diagnosis.
+            </p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- Left panel: Controls -->
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 h-fit">
-                <h2 class="text-xl font-semibold mb-4">Select Input Image</h2>
-                <p class="text-sm text-gray-600 mb-6">Choose an eccentric photorefraction image pattern to feed into the network.</p>
-                
-                <div class="space-y-4">
-                    <button onclick="runNetwork('myopia')" class="w-full text-left p-4 rounded border hover:border-blue-500 hover:bg-blue-50 transition flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full border-4 border-black relative overflow-hidden bg-black flex items-center justify-center">
-                            <div class="w-10 h-10 rounded-full gradient-myopia"></div>
-                            <div class="w-1 h-1 bg-white rounded-full absolute"></div>
-                        </div>
-                        <div>
-                            <div class="font-semibold">Myopia</div>
-                            <div class="text-xs text-gray-500">Bright region top</div>
-                        </div>
-                    </button>
-
-                    <button onclick="runNetwork('emmetropia')" class="w-full text-left p-4 rounded border hover:border-blue-500 hover:bg-blue-50 transition flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full border-4 border-black relative overflow-hidden bg-black flex items-center justify-center">
-                            <div class="w-10 h-10 rounded-full gradient-emmetropia"></div>
-                            <div class="w-1 h-1 bg-white rounded-full absolute"></div>
-                        </div>
-                        <div>
-                            <div class="font-semibold">Emmetropia</div>
-                            <div class="text-xs text-gray-500">Uniform brightness</div>
-                        </div>
-                    </button>
-
-                    <button onclick="runNetwork('hyperopia')" class="w-full text-left p-4 rounded border hover:border-blue-500 hover:bg-blue-50 transition flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full border-4 border-black relative overflow-hidden bg-black flex items-center justify-center">
-                            <div class="w-10 h-10 rounded-full gradient-hyperopia"></div>
-                            <div class="w-1 h-1 bg-white rounded-full absolute"></div>
-                        </div>
-                        <div>
-                            <div class="font-semibold">Hyperopia</div>
-                            <div class="text-xs text-gray-500">Bright region bottom</div>
-                        </div>
-                    </button>
+        <!-- Top Controls -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8 flex flex-col md:flex-row gap-6 items-center justify-center">
+            <div class="font-semibold text-lg">1. Choose Input Image:</div>
+            
+            <button onclick="runNetwork('myopia')" class="p-3 rounded border hover:border-blue-500 hover:bg-blue-50 transition flex items-center gap-3 w-48">
+                <div class="w-10 h-10 rounded-full border-2 border-black relative overflow-hidden bg-black flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-full gradient-myopia"></div>
+                    <div class="w-1 h-1 bg-white rounded-full absolute"></div>
                 </div>
-                
-                <div class="mt-8 p-4 bg-gray-100 rounded text-sm">
-                    <strong>Status:</strong> <span id="status-text">Waiting for input...</span>
+                <div class="text-left leading-tight">
+                    <div class="font-bold text-sm">Myopia</div>
+                    <div class="text-[10px] text-gray-500">Bright at top</div>
+                </div>
+            </button>
+
+            <button onclick="runNetwork('emmetropia')" class="p-3 rounded border hover:border-blue-500 hover:bg-blue-50 transition flex items-center gap-3 w-48">
+                <div class="w-10 h-10 rounded-full border-2 border-black relative overflow-hidden bg-black flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-full gradient-emmetropia"></div>
+                    <div class="w-1 h-1 bg-white rounded-full absolute"></div>
+                </div>
+                <div class="text-left leading-tight">
+                    <div class="font-bold text-sm">Emmetropia</div>
+                    <div class="text-[10px] text-gray-500">Uniform brightness</div>
+                </div>
+            </button>
+
+            <button onclick="runNetwork('hyperopia')" class="p-3 rounded border hover:border-blue-500 hover:bg-blue-50 transition flex items-center gap-3 w-48">
+                <div class="w-10 h-10 rounded-full border-2 border-black relative overflow-hidden bg-black flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-full gradient-hyperopia"></div>
+                    <div class="w-1 h-1 bg-white rounded-full absolute"></div>
+                </div>
+                <div class="text-left leading-tight">
+                    <div class="font-bold text-sm">Hyperopia</div>
+                    <div class="text-[10px] text-gray-500">Bright at bottom</div>
+                </div>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left panel: Network Architecture -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-xl font-semibold mb-6 border-b pb-2">2. The CNN Pipeline</h2>
+                <div id="network-container" class="flex flex-col relative pb-4">
+                    <!-- Nodes injected via JS -->
                 </div>
             </div>
 
-            <!-- Right panel: Network -->
-            <div class="col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h2 class="text-xl font-semibold mb-6 text-center">MobileNetV2-based CNN Architecture</h2>
+            <!-- Right panel: Explanation -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 h-fit sticky top-8">
+                <h2 class="text-xl font-semibold mb-6 border-b pb-2">3. What is happening here?</h2>
                 
-                <div id="network-container" class="flex flex-col items-center">
-                    <!-- Nodes will be injected here by JS -->
+                <div id="explanation-panel" class="prose prose-sm max-w-none text-gray-700">
+                    <div class="text-center text-gray-400 py-12 italic">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Select an input image to start the animation, or click on any layer to see its detailed mechanics.
+                    </div>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <h3 class="text-center font-semibold mb-4 text-gray-500">Predicted Classification</h3>
-                    <div class="flex justify-center gap-4">
-                        <div id="out-myopia" class="node px-6 py-3 rounded-lg border-2 border-red-200 bg-red-50 text-red-700 font-bold opacity-50">Myopia</div>
-                        <div id="out-emmetropia" class="node px-6 py-3 rounded-lg border-2 border-green-200 bg-green-50 text-green-700 font-bold opacity-50">Emmetropia</div>
-                        <div id="out-hyperopia" class="node px-6 py-3 rounded-lg border-2 border-blue-200 bg-blue-50 text-blue-700 font-bold opacity-50">Hyperopia</div>
+                <div id="final-result" class="mt-8 hidden">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3 border-t pt-4">Final Prediction</h3>
+                    <div class="flex gap-4">
+                        <div id="out-myopia" class="flex-1 text-center py-3 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50 font-bold">Myopia</div>
+                        <div id="out-emmetropia" class="flex-1 text-center py-3 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50 font-bold">Emmetropia</div>
+                        <div id="out-hyperopia" class="flex-1 text-center py-3 rounded-lg border-2 border-gray-200 bg-gray-50 opacity-50 font-bold">Hyperopia</div>
                     </div>
                 </div>
             </div>
